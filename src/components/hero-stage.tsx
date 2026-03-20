@@ -185,17 +185,19 @@ export default function HeroStage() {
 
       {/* Headline overlay — large text behind image */}
       <motion.div
-        className="absolute bottom-8 left-8 md:left-16 right-8 md:right-16 pointer-events-none"
+        className="absolute bottom-8 left-8 md:left-16 pointer-events-none z-0"
         custom={1.8}
         variants={fadeUpVariants}
         initial="initial"
         animate="animate"
       >
         <h1
-          className="font-display font-black text-white leading-none tracking-tight mix-blend-overlay opacity-60"
+          className="font-display font-black text-white flex flex-col leading-[0.8] tracking-tight mix-blend-overlay opacity-60"
           style={{ fontSize: "clamp(5rem, 14vw, 14rem)" }}
         >
-          KARINA
+          {"KARINA".split("").map((letter, i) => (
+            <span key={i}>{letter}</span>
+          ))}
         </h1>
       </motion.div>
 
