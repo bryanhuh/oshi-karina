@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useStageMode } from "@/context/stage-mode-context";
 import { EASE } from "@/lib/motion";
@@ -64,15 +65,13 @@ export default function HeroStage() {
 
   return (
     <section
-      className={`relative min-h-screen overflow-hidden flex items-center transition-colors duration-700 ${
-        stageMode ? "bg-night" : "bg-royal-blue"
-      }`}
+      className={`relative min-h-screen overflow-hidden flex items-center transition-colors duration-700 ${stageMode ? "bg-night" : "bg-royal-blue"
+        }`}
     >
       {/* Background gradient */}
       <div
-        className={`absolute inset-0 transition-opacity duration-700 ${
-          stageMode ? "opacity-100" : "opacity-60"
-        }`}
+        className={`absolute inset-0 transition-opacity duration-700 ${stageMode ? "opacity-100" : "opacity-60"
+          }`}
         style={{
           background:
             "radial-gradient(ellipse at 60% 50%, #1A5FD2 0%, transparent 60%), radial-gradient(ellipse at 10% 80%, #0F3F8C 0%, transparent 50%)",
@@ -139,14 +138,22 @@ export default function HeroStage() {
                 : "linear-gradient(135deg, #0F3F8C 0%, #1A5FD2 50%, #6FAEFF 100%)",
             }}
           >
-            {/* Placeholder for Karina image */}
-            <div className="absolute inset-0 flex items-end p-8">
+            {/* Karina image */}
+            <div className="absolute inset-0 overflow-hidden">
+              <Image
+                src="/assets/karina-02.png"
+                alt="Karina"
+                fill
+                priority
+                className="object-cover object-center"
+              />
+              {/* Subtle gradient to blend the bottom of the image into the container */}
               <div
-                className="w-full h-[70%] opacity-20"
+                className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
                 style={{
-                  background:
-                    "linear-gradient(to top, #C9D3E6 0%, transparent 100%)",
-                  maskImage: "linear-gradient(to top, black 0%, transparent 100%)",
+                  background: stageMode
+                    ? "linear-gradient(to top, #05070C 0%, transparent 100%)"
+                    : "linear-gradient(to top, #0F3F8C 0%, transparent 100%)",
                 }}
               />
             </div>
