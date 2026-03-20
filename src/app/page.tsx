@@ -1,12 +1,32 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import HeroStage from "@/components/hero-stage";
 import { eras } from "@/data/eras";
 import { useStageMode } from "@/context/stage-mode-context";
 import { EASE } from "@/lib/motion";
+
+const aboutParagraphs = [
+  {
+    label: "Introduction",
+    text: "Karina (born Yoo Jimin) is a South Korean singer, rapper, and dancer under SM Entertainment. She is best known as the leader, main dancer, lead rapper, sub vocalist and visual of the girl group aespa.",
+  },
+  {
+    label: "Pre-Debut",
+    text: "Before debuting, Karina was active on social media and was recruited by SM Entertainment in 2016. She made her first public appearance in Taemin\u2019s Want MV on February 19, 2019, and also performed as a backup dancer during its promotions. She debuted as the leader of aespa on November 17, 2020, with the digital single Black Mamba.",
+  },
+  {
+    label: "GOT the Beat",
+    text: "On January 3, 2022, she debuted as a member of GOT the beat, a unit from SM\u2019s project girl group Girls On Top, alongside her aespa bandmate Winter. She also participated in SM Entertainment\u2019s ninth winter album 2022 Winter SMTOWN: SMCU Palace, featuring on the track Hot & Cold with EXO\u2019s Kai, Red Velvet\u2019s Seulgi, and NCT\u2019s Jeno.",
+  },
+  {
+    label: "Solo Work",
+    text: "In 2023, Karina contributed to the OST for the Netflix drama Song of the Bandits with the track Sad Waltz, further showcasing her versatility as an artist.",
+  },
+];
 
 const fadeUp = {
   initial: { y: 50, opacity: 0 },
@@ -17,106 +37,161 @@ const fadeUp = {
   }),
 };
 
+function ScrollParagraph({
+  label,
+  text,
+  index,
+  total,
+  scrollYProgress,
+}: {
+  label: string;
+  text: string;
+  index: number;
+  total: number;
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
+  const segmentSize = 1 / (total + 1);
+  const start = (index + 0.5) * segmentSize;
+  const peak = (index + 1) * segmentSize;
+  const end = (index + 1.5) * segmentSize;
+
+  const opacity = useTransform(
+    scrollYProgress,
+    [start, peak, Math.min(end, 0.95)],
+    index === total - 1 ? [0, 1, 1] : [0, 1, 0]
+  );
+  const y = useTransform(
+    scrollYProgress,
+    [start, peak, Math.min(end, 0.95)],
+    index === total - 1 ? [60, 0, 0] : [60, 0, -40]
+  );
+
+  return (
+    <motion.div
+      className="absolute inset-0 flex flex-col justify-center"
+      style={{ opacity, y }}
+    >
+      <span className="font-display text-xs tracking-[0.5em] text-white/50 uppercase mb-6">
+        {label}
+      </span>
+      <p className="font-body text-white text-base md:text-lg leading-relaxed max-w-lg">
+        {text}
+      </p>
+      <div className="flex items-center gap-3 mt-8">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-px transition-all duration-300 ${
+              i === index ? "w-8 bg-neon-blue" : "w-4 bg-silver/20"
+            }`}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 function IntroSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-15%" });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(stickyRef, { once: true, margin: "-10%" });
   const { stageMode } = useStageMode();
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Title stays visible for the first segment then fades
+  const segmentSize = 1 / (aboutParagraphs.length + 1);
+  const titleOpacity = useTransform(
+    scrollYProgress,
+    [0, segmentSize * 0.3, segmentSize * 0.8],
+    [0, 1, 1]
+  );
+  const titleY = useTransform(
+    scrollYProgress,
+    [0, segmentSize * 0.3],
+    [80, 0]
+  );
 
   return (
     <section
-      ref={ref}
-      className={`relative min-h-screen flex items-center overflow-hidden transition-colors duration-700 ${
+      ref={containerRef}
+      className={`relative transition-colors duration-700 ${
         stageMode ? "bg-night" : "bg-royal-blue"
       }`}
+      style={{ height: `${(aboutParagraphs.length + 2) * 100}vh` }}
     >
+      {/* Sticky viewport */}
       <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          background:
-            "radial-gradient(ellipse at 80% 20%, #1A5FD2 0%, transparent 50%)",
-        }}
-      />
+        ref={stickyRef}
+        className="sticky top-0 h-screen w-full overflow-hidden"
+      >
+        {/* Background gradient */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background:
+              "radial-gradient(ellipse at 80% 20%, #1A5FD2 0%, transparent 50%)",
+          }}
+        />
 
-      <div className="relative z-10 grid grid-cols-12 gap-4 px-8 md:px-16 w-full py-24">
-        {/* Oversized background text */}
-        <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none">
-          <motion.span
-            initial={{ x: "10%", opacity: 0 }}
-            animate={isInView ? { x: 0, opacity: 0.04 } : {}}
-            transition={{ duration: 1.2, ease: EASE }}
-            className="font-display font-black text-white whitespace-nowrap select-none"
-            style={{ fontSize: "clamp(8rem, 20vw, 22rem)" }}
-          >
-            ARCHIVE
-          </motion.span>
-        </div>
-
-        {/* Left quote */}
-        <div className="col-span-12 md:col-span-5 md:col-start-2 flex flex-col justify-center">
-          <motion.div
-            custom={0.1}
-            variants={fadeUp}
-            initial="initial"
-            animate={isInView ? "animate" : "initial"}
-            className="mb-8"
-          >
-            <span className="font-display text-xs tracking-[0.5em] text-neon-blue uppercase">
-              About
-            </span>
-          </motion.div>
-
-          <motion.h2
-            custom={0.2}
-            variants={fadeUp}
-            initial="initial"
-            animate={isInView ? "animate" : "initial"}
-            className="font-display font-black text-white leading-tight mb-8"
-            style={{ fontSize: "clamp(2.5rem, 5vw, 5rem)" }}
-          >
-            Stage. Screen.
-            <br />
-            <span className="text-neon-blue">Presence.</span>
-          </motion.h2>
-
-          <motion.p
-            custom={0.35}
-            variants={fadeUp}
-            initial="initial"
-            animate={isInView ? "animate" : "initial"}
-            className="font-body text-silver/60 text-sm leading-relaxed max-w-md"
-          >
-            Yu Ji-min, known professionally as Karina, is the leader of SM
-            Entertainment&apos;s aespa. This archive traces her artistic journey —
-            each era a chapter, each stage a statement.
-          </motion.p>
-        </div>
-
-        {/* Right stat block */}
-        <div className="col-span-12 md:col-span-4 md:col-start-8 flex flex-col justify-center gap-10 mt-16 md:mt-0">
-          {[
-            { label: "Debut Year", value: "2020" },
-            { label: "Eras", value: `${eras.length}` },
-            { label: "Group", value: "aespa" },
-          ].map((stat, i) => (
+        <div className="relative z-10 h-full grid grid-cols-12 gap-4 px-8 md:px-16">
+          {/* Left side: scroll-driven text content */}
+          <div className="col-span-12 md:col-span-6 flex items-center relative">
+            {/* Section title — fades in and stays */}
             <motion.div
-              key={stat.label}
-              custom={0.3 + i * 0.1}
-              variants={fadeUp}
-              initial="initial"
-              animate={isInView ? "animate" : "initial"}
-              className="border-b border-silver/10 pb-6"
+              className="absolute top-[12vh] left-0"
+              style={{ opacity: titleOpacity, y: titleY }}
             >
-              <p className="font-display text-xs tracking-[0.4em] text-silver/30 uppercase mb-2">
-                {stat.label}
-              </p>
-              <p
-                className="font-display font-black text-white"
-                style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
+              <span className="font-display text-xs tracking-[0.5em] text-neon-blue uppercase">
+                About
+              </span>
+              <h2
+                className="font-display font-black text-white leading-tight mt-4"
+                style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)" }}
               >
-                {stat.value}
-              </p>
+                Who is
+                <br />
+                <span className="text-neon-blue">Karina?</span>
+              </h2>
             </motion.div>
-          ))}
+
+            {/* Paragraphs that swap in/out on scroll */}
+            {aboutParagraphs.map((para, i) => (
+              <ScrollParagraph
+                key={para.label}
+                label={para.label}
+                text={para.text}
+                index={i}
+                total={aboutParagraphs.length}
+                scrollYProgress={scrollYProgress}
+              />
+            ))}
+          </div>
+
+          {/* Right side: Karina portrait — completely static */}
+          <div className="hidden md:flex col-span-5 col-start-8 items-center justify-center">
+            <div className="relative w-full h-[80vh]">
+              <Image
+                src="/assets/karina-03.png"
+                alt="Karina"
+                fill
+                className="object-contain object-center"
+                sizes="40vw"
+                priority
+              />
+              {/* Glow effect behind portrait */}
+              <div
+                className="absolute inset-0 -z-10 blur-3xl opacity-20"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, #1A5FD2 0%, transparent 70%)",
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
