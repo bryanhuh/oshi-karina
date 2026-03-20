@@ -112,7 +112,7 @@ export default function HeroStage() {
           >
             Visual Archive
           </motion.p>
-          <motion.p
+          {/* <motion.p
             custom={1.4}
             variants={fadeUpVariants}
             initial="initial"
@@ -120,7 +120,7 @@ export default function HeroStage() {
             className="font-body text-sm text-silver/60 leading-relaxed max-w-xs"
           >
             Documenting the artistry of aespa&apos;s Karina — from debut through every era.
-          </motion.p>
+          </motion.p> */}
         </div>
 
         {/* Center image — columns 4-10 */}
@@ -162,7 +162,7 @@ export default function HeroStage() {
                 AESPA
               </span>
               <span className="font-display text-xs tracking-[0.4em] text-silver/40">
-                2020 — PRESENT
+                LEADER
               </span>
             </div>
           </div>
